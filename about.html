@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>소개 — CleanMD</title>
+<meta name="description" content="CleanMD는 AI 답변의 마크다운을 깔끔한 텍스트로 변환해주는 무료 도구입니다.">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f0f11; --surface: #18181c; --surface2: #1f1f26;
+    --border: rgba(255,255,255,0.08); --text: #e8e8ef; --muted: #8888a0;
+    --accent: #7c6cf8; --accent-glow: rgba(124,108,248,0.35);
+    --font: 'Inter', sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.7; min-height: 100vh; }
+
+  header { padding: 18px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface); }
+  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .logo-icon { width: 30px; height: 30px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; box-shadow: 0 0 14px var(--accent-glow); }
+  .logo-text { font-size: 17px; font-weight: 600; color: var(--text); }
+  .logo-text span { color: var(--accent); }
+  nav { display: flex; gap: 20px; }
+  nav a { color: var(--muted); text-decoration: none; font-size: 14px; transition: color .15s; }
+  nav a:hover { color: var(--text); }
+
+  .container { max-width: 720px; margin: 60px auto; padding: 0 28px; }
+  h1 { font-size: 32px; font-weight: 600; margin-bottom: 12px; }
+  h1 span { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 16px; margin-bottom: 48px; }
+
+  .section { margin-bottom: 48px; }
+  h2 { font-size: 18px; font-weight: 600; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  p { color: #b8b8cc; margin-bottom: 14px; }
+
+  .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 20px; }
+  .feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .feature-icon { font-size: 24px; margin-bottom: 10px; }
+  .feature-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .feature-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  .use-case { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin-bottom: 12px; }
+  .use-case-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; color: var(--accent); }
+  .use-case-desc { font-size: 13px; color: var(--muted); }
+
+  footer { border-top: 1px solid var(--border); padding: 24px 28px; text-align: center; color: var(--muted); font-size: 13px; margin-top: 80px; }
+  footer a { color: var(--muted); text-decoration: none; margin: 0 10px; }
+  footer a:hover { color: var(--text); }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo">
+    <div class="logo-icon">✦</div>
+    <div class="logo-text">Clean<span>MD</span></div>
+  </a>
+  <nav>
+    <a href="index.html">도구 사용</a>
+    <a href="about.html">소개</a>
+    <a href="contact.html">문의</a>
+    <a href="privacy.html">개인정보처리방침</a>
+  </nav>
+</header>
+
+<div class="container">
+  <h1>AI 마크다운을 <span>깔끔하게</span></h1>
+  <p class="subtitle">CleanMD는 ChatGPT, Claude 등 AI 답변의 마크다운 기호를 제거하고 깔끔한 텍스트로 변환해주는 무료 온라인 도구입니다.</p>
+
+  <div class="section">
+    <h2>CleanMD란?</h2>
+    <p>AI 챗봇을 사용하다 보면 답변에 <strong>**, ##, -, `코드`</strong> 같은 마크다운 기호가 가득한 경우가 많습니다. 이런 기호들은 이메일, 카카오톡, 업무 문서에 그대로 붙여넣으면 보기 좋지 않습니다.</p>
+    <p>CleanMD는 이 마크다운 기호들을 즉시 제거하거나, 반대로 HTML이나 이메일 형식으로 깔끔하게 변환해드립니다. 서버 없이 브라우저에서 바로 처리되므로 개인정보 유출 걱정이 없습니다.</p>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">실시간 변환</div>
+        <div class="feature-desc">붙여넣는 즉시 결과가 나타납니다. 서버 요청 없이 브라우저에서 처리됩니다.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎛️</div>
+        <div class="feature-title">선택적 제거</div>
+        <div class="feature-desc">굵게, 제목, 코드 등 제거할 요소를 개별적으로 선택할 수 있습니다.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📋</div>
+        <div class="feature-title">3가지 출력 형식</div>
+        <div class="feature-desc">일반 텍스트, HTML, 이메일 형식 중 원하는 형태로 변환합니다.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <div class="feature-title">개인정보 보호</div>
+        <div class="feature-desc">입력한 내용이 서버로 전송되지 않습니다. 모든 처리는 브라우저에서만 이루어집니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>이런 분들께 유용합니다</h2>
+    <div class="use-case">
+      <div class="use-case-title">📧 업무 이메일 작성자</div>
+      <div class="use-case-desc">AI가 써준 이메일 초안의 마크다운 기호를 제거하고 깔끔하게 발송하세요.</div>
+    </div>
+    <div class="use-case">
+      <div class="use-case-title">📝 블로거 & 콘텐츠 크리에이터</div>
+      <div class="use-case-desc">AI 답변을 HTML로 변환해 블로그에 바로 사용하세요.</div>
+    </div>
+    <div class="use-case">
+      <div class="use-case-title">💬 SNS & 카카오톡 사용자</div>
+      <div class="use-case-desc">마크다운 기호 없이 깔끔한 텍스트만 추출해 공유하세요.</div>
+    </div>
+    <div class="use-case">
+      <div class="use-case-title">🖥️ 개발자 & AI 헤비유저</div>
+      <div class="use-case-desc">AI 출력물을 다양한 형식으로 빠르게 변환해 워크플로우를 개선하세요.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>완전 무료</h2>
+    <p>CleanMD는 광고 기반으로 운영되는 완전 무료 서비스입니다. 회원가입, 로그인, 사용 제한 없이 누구나 자유롭게 사용할 수 있습니다.</p>
+  </div>
+</div>
+
+<footer>
+  <div>© 2025 CleanMD. All rights reserved.</div>
+  <div style="margin-top: 10px;">
+    <a href="index.html">홈</a>
+    <a href="about.html">소개</a>
+    <a href="contact.html">문의</a>
+    <a href="privacy.html">개인정보처리방침</a>
+  </div>
+</footer>
+
+</body>
+</html>
