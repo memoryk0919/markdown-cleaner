@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CleanMD — AI 출력 마크다운 정리기</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f0f11;
+    --surface: #18181c;
+    --surface2: #1f1f26;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #e8e8ef;
+    --muted: #8888a0;
+    --accent: #7c6cf8;
+    --accent-dim: rgba(124,108,248,0.15);
+    --accent-glow: rgba(124,108,248,0.35);
+    --green: #4ade80;
+    --green-dim: rgba(74,222,128,0.12);
+    --red: #f87171;
+    --font: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
+
+  header { padding: 18px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface); flex-shrink: 0; }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-icon { width: 30px; height: 30px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; box-shadow: 0 0 14px var(--accent-glow); }
+  .logo-text { font-size: 17px; font-weight: 600; letter-spacing: -.3px; }
+  .logo-text span { color: var(--accent); }
+  .header-badge { font-size: 11px; font-family: var(--mono); color: var(--muted); background: var(--surface2); border: 1px solid var(--border); padding: 4px 10px; border-radius: 20px; }
+
+  .mode-bar { display: flex; gap: 4px; padding: 14px 28px 0; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
+  .mode-tab { padding: 7px 16px; border-radius: 8px 8px 0 0; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--muted); border: 1px solid transparent; border-bottom: none; background: transparent; transition: all .15s; position: relative; bottom: -1px; font-family: var(--font); }
+  .mode-tab:hover { color: var(--text); }
+  .mode-tab.active { color: var(--text); background: var(--bg); border-color: var(--border); border-bottom-color: var(--bg); }
+
+  .preset-row { padding: 10px 28px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex-shrink: 0; }
+  .preset-label { font-size: 11px; color: var(--muted); }
+  .preset-btn { font-size: 12px; padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; font-family: var(--font); transition: all .15s; }
+  .preset-btn:hover { color: var(--text); border-color: var(--border2); }
+
+  main { flex: 1; display: grid; grid-template-columns: 1fr 1fr; min-height: 0; overflow: hidden; }
+  .pane { display: flex; flex-direction: column; border-right: 1px solid var(--border); overflow: hidden; }
+  .pane:last-child { border-right: none; }
+  .pane-header { padding: 12px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface2); flex-shrink: 0; }
+  .pane-label { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .dot-in { background: var(--muted); }
+  .dot-out { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .pane-actions { display: flex; gap: 6px; }
+
+  textarea { flex: 1; background: var(--bg); color: var(--text); font-family: var(--mono); font-size: 13px; line-height: 1.7; border: none; outline: none; resize: none; padding: 18px; width: 100%; }
+  textarea::placeholder { color: var(--muted); }
+
+  .output-area { flex: 1; padding: 18px; font-size: 14px; line-height: 1.75; overflow-y: auto; white-space: pre-wrap; word-break: break-word; background: var(--bg); font-family: var(--mono); }
+  .output-area.html-mode { white-space: normal; font-family: var(--font); }
+
+  .btn { font-family: var(--font); font-size: 12px; font-weight: 500; padding: 5px 11px; border-radius: 6px; border: 1px solid var(--border2); background: var(--surface); color: var(--muted); cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 4px; }
+  .btn:hover { color: var(--text); background: var(--surface2); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; padding: 7px 18px; font-size: 13px; box-shadow: 0 0 18px var(--accent-glow); }
+  .btn.primary:hover { opacity: .88; }
+  .btn.success { color: var(--green); border-color: var(--green); background: var(--green-dim); }
+
+  .toolbar { padding: 10px 18px; background: var(--surface); border-top: 1px solid var(--border); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex-shrink: 0; }
+  .toolbar-label { font-size: 11px; color: var(--muted); }
+  .chip { font-size: 11px; font-family: var(--mono); padding: 3px 9px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); cursor: pointer; transition: all .15s; white-space: nowrap; }
+  .chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+  .chip.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+  .stats-bar { padding: 8px 18px; border-top: 1px solid var(--border); display: flex; gap: 18px; background: var(--surface2); flex-shrink: 0; }
+  .stat { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+  .stat span { color: var(--accent); }
+
+  .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--muted); font-size: 13px; padding: 40px; text-align: center; font-family: var(--font); }
+  .empty-icon { font-size: 28px; opacity: .35; margin-bottom: 4px; }
+
+  .bottom-bar { padding: 10px 28px; background: var(--surface); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .hint { font-size: 11px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">✦</div>
+    <div class="logo-text">Clean<span>MD</span></div>
+  </div>
+  <div class="header-badge">AI 마크다운 정리기 v1.0</div>
+</header>
+
+<div class="mode-bar">
+  <button class="mode-tab active" onclick="setMode('plain')" id="tab-plain">일반 텍스트</button>
+  <button class="mode-tab" onclick="setMode('html')" id="tab-html">HTML 변환</button>
+  <button class="mode-tab" onclick="setMode('email')" id="tab-email">이메일 형식</button>
+</div>
+
+<div class="preset-row">
+  <span class="preset-label">예시 불러오기 →</span>
+  <button class="preset-btn" onclick="loadPreset('gpt')">ChatGPT 스타일</button>
+  <button class="preset-btn" onclick="loadPreset('claude')">Claude 스타일</button>
+  <button class="preset-btn" onclick="loadPreset('code')">코드 포함</button>
+</div>
+
+<main>
+  <div class="pane">
+    <div class="pane-header">
+      <div class="pane-label"><span class="dot dot-in"></span> 입력 (마크다운)</div>
+      <div class="pane-actions">
+        <button class="btn" onclick="clearInput()">지우기</button>
+        <button class="btn" onclick="pasteClipboard()">📋 붙여넣기</button>
+      </div>
+    </div>
+    <textarea id="input" placeholder="여기에 ChatGPT / Claude 답변을 붙여넣으세요.
+
+**굵은 글씨**, *이탤릭*, ## 제목, - 목록, `코드` 등이
+모두 깔끔하게 정리됩니다." oninput="convert()"></textarea>
+    <div class="toolbar">
+      <span class="toolbar-label">제거:</span>
+      <span class="chip active" id="chip-bold" onclick="toggleChip('bold')">**굵게**</span>
+      <span class="chip active" id="chip-italic" onclick="toggleChip('italic')">*이탤릭*</span>
+      <span class="chip active" id="chip-heading" onclick="toggleChip('heading')">## 제목</span>
+      <span class="chip active" id="chip-code" onclick="toggleChip('code')">`코드`</span>
+      <span class="chip active" id="chip-bullet" onclick="toggleChip('bullet')">- 목록</span>
+      <span class="chip active" id="chip-link" onclick="toggleChip('link')">[링크]</span>
+      <span class="chip active" id="chip-table" onclick="toggleChip('table')">| 표 |</span>
+      <span class="chip active" id="chip-quote" onclick="toggleChip('quote')">&gt; 인용</span>
+    </div>
+    <div class="stats-bar">
+      <div class="stat">입력 <span id="stat-in">0</span>자</div>
+      <div class="stat">줄 <span id="stat-lines">0</span>행</div>
+    </div>
+  </div>
+
+  <div class="pane">
+    <div class="pane-header">
+      <div class="pane-label"><span class="dot dot-out"></span> 출력 (정제됨)</div>
+      <div class="pane-actions">
+        <button class="btn" id="copy-btn" onclick="copyOutput()">복사</button>
+        <button class="btn" onclick="downloadOutput()">⬇ 저장</button>
+      </div>
+    </div>
+    <div id="output" class="output-area">
+      <div class="empty-state">
+        <div class="empty-icon">✦</div>
+        <div>왼쪽에 마크다운을 붙여넣으면<br>여기서 정제된 결과를 볼 수 있어요</div>
+      </div>
+    </div>
+    <div class="stats-bar">
+      <div class="stat">출력 <span id="stat-out">0</span>자</div>
+      <div class="stat">제거 <span id="stat-removed">0</span>자</div>
+      <div class="stat">압축 <span id="stat-ratio">-</span></div>
+    </div>
+  </div>
+</main>
+
+<div class="bottom-bar">
+  <span class="hint">💡 Ctrl+V 붙여넣기 즉시 변환 · Ctrl+Enter 결과 복사</span>
+  <button class="btn primary" onclick="copyOutput()">✦ 결과 복사</button>
+</div>
+
+<script>
+let currentMode = 'plain';
+let chips = { bold:true, italic:true, heading:true, code:true, bullet:true, link:true, table:true, quote:true };
+
+const PRESETS = {
+  gpt: `## 프로젝트 관리의 핵심 원칙\n\n안녕하세요! **명확하고 실용적인** 답변을 드릴게요.\n\n### 1. 목표 설정\n프로젝트의 성공을 위해서는 *명확한 목표*가 필수입니다.\n\n- **SMART 목표**: Specific, Measurable, Achievable, Relevant, Time-bound\n- **우선순위 설정**: 중요도와 긴급도를 기준으로 분류\n- **이해관계자 파악**: 모든 관련자 식별\n\n### 2. 일정 관리\n> "계획 없이 일하는 것은 실패를 계획하는 것과 같다"\n\n\`\`\`\n간트 차트 → 마일스톤 → 주간 리뷰\n\`\`\`\n\n자세한 내용은 [PM 가이드](https://example.com)를 참고하세요.\n\n| 단계 | 기간 | 담당자 |\n|------|------|--------|\n| 기획 | 1주 | PM |\n| 개발 | 4주 | Dev |\n| 테스트 | 1주 | QA |`,
+  claude: `**핵심 요약**: 마케팅 전략의 3가지 핵심 요소\n\n*주의: 아래 내용은 B2B 기준입니다.*\n\n## 1. 타겟 고객 분석\n\n타겟 고객을 정확히 파악하는 것이 **가장 중요한 첫 단계**입니다.\n\n- 연령대, 직군, 관심사 파악\n- 고객의 **페인포인트** 식별\n- 경쟁사 고객 분석\n\n## 2. 콘텐츠 전략\n\n\`콘텐츠 마케팅\`은 단기 광고보다 *장기적으로 더 효과적*입니다.\n\n> 좋은 콘텐츠는 고객이 찾아오게 만든다\n\n## 3. 성과 측정\n\n**KPI 설정이 없으면 개선도 없습니다.**`,
+  code: `## API 연동 방법\n\n\`fetch\` 함수를 사용하여 **간단하게** API를 호출할 수 있습니다.\n\n\`\`\`javascript\nasync function callAPI(prompt) {\n  const response = await fetch('/api/chat', {\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json' },\n    body: JSON.stringify({ message: prompt })\n  });\n  return response.json();\n}\n\`\`\`\n\n### 주의사항\n\n- *에러 처리*를 반드시 포함하세요\n- **API 키**는 환경변수로 관리하세요\n- \`rate limit\` 제한을 고려하세요`
+};
+
+function setMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + mode).classList.add('active');
+  document.getElementById('output').classList.toggle('html-mode', mode === 'html');
+  convert();
+}
+
+function toggleChip(name) {
+  chips[name] = !chips[name];
+  document.getElementById('chip-' + name).classList.toggle('active', chips[name]);
+  convert();
+}
+
+function convert() {
+  const raw = document.getElementById('input').value;
+  document.getElementById('stat-in').textContent = raw.length;
+  document.getElementById('stat-lines').textContent = raw ? raw.split('\n').length : 0;
+  const out = document.getElementById('output');
+  if (!raw.trim()) {
+    out.innerHTML = '<div class="empty-state"><div class="empty-icon">✦</div><div>왼쪽에 마크다운을 붙여넣으면<br>여기서 정제된 결과를 볼 수 있어요</div></div>';
+    ['stat-out','stat-removed'].forEach(id => document.getElementById(id).textContent = 0);
+    document.getElementById('stat-ratio').textContent = '-';
+    return;
+  }
+  if (currentMode === 'html') {
+    out.innerHTML = toHTML(raw);
+  } else {
+    out.textContent = currentMode === 'email' ? toEmail(raw) : toPlain(raw);
+  }
+  const outLen = out.innerText.length;
+  const removed = Math.max(0, raw.length - outLen);
+  const ratio = raw.length > 0 ? Math.round((1 - outLen / raw.length) * 100) : 0;
+  document.getElementById('stat-out').textContent = outLen;
+  document.getElementById('stat-removed').textContent = removed;
+  document.getElementById('stat-ratio').textContent = ratio + '%';
+}
+
+function toPlain(text) {
+  let t = text;
+  if (chips.code) { t = t.replace(/```[\s\S]*?```/g, m => m.replace(/```\w*\n?/g,'').trim()); t = t.replace(/`([^`]+)`/g,'$1'); }
+  if (chips.table) t = t.replace(/^\|.+\|$/gm,'').replace(/^\|[-| :]+\|$/gm,'');
+  if (chips.heading) t = t.replace(/^#{1,6}\s+/gm,'');
+  if (chips.quote) t = t.replace(/^>\s?/gm,'');
+  if (chips.bold) { t = t.replace(/\*\*\*(.+?)\*\*\*/g,'$1'); t = t.replace(/\*\*(.+?)\*\*/g,'$1'); t = t.replace(/__(.+?)__/g,'$1'); }
+  if (chips.italic) { t = t.replace(/\*(.+?)\*/g,'$1'); t = t.replace(/_(.+?)_/g,'$1'); }
+  if (chips.bullet) { t = t.replace(/^[ \t]*[-*+]\s+/gm,''); t = t.replace(/^\s*\d+\.\s+/gm,''); }
+  if (chips.link) t = t.replace(/\[([^\]]+)\]\([^)]+\)/g,'$1');
+  t = t.replace(/^[-*_]{3,}$/gm,'');
+  t = t.replace(/\n{3,}/g,'\n\n').trim();
+  return t;
+}
+
+function toHTML(text) {
+  let t = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  t = t.replace(/```(\w*)\n?([\s\S]*?)```/g,(_,lang,code)=>`<pre style="background:#1a1a22;padding:12px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.08);font-size:12px;overflow-x:auto;margin:8px 0"><code>${code.trim()}</code></pre>`);
+  t = t.replace(/`([^`]+)`/g,'<code style="background:#1a1a22;padding:2px 6px;border-radius:4px;font-size:12px;font-family:monospace">$1</code>');
+  t = t.replace(/^### (.+)$/gm,'<h3 style="font-size:15px;font-weight:600;margin:16px 0 6px;color:#e8e8ef">$1</h3>');
+  t = t.replace(/^## (.+)$/gm,'<h2 style="font-size:17px;font-weight:600;margin:20px 0 8px;color:#e8e8ef">$1</h2>');
+  t = t.replace(/^# (.+)$/gm,'<h1 style="font-size:20px;font-weight:600;margin:20px 0 10px;color:#e8e8ef">$1</h1>');
+  t = t.replace(/\*\*\*(.+?)\*\*\*/g,'<strong><em>$1</em></strong>');
+  t = t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  t = t.replace(/\*(.+?)\*/g,'<em>$1</em>');
+  t = t.replace(/^&gt;\s?(.+)$/gm,'<blockquote style="border-left:3px solid #7c6cf8;padding:8px 16px;margin:8px 0;color:#8888a0;font-style:italic">$1</blockquote>');
+  t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" style="color:#7c6cf8">$1</a>');
+  t = t.replace(/\|(.+)\|\n\|[-| :]+\|\n((?:\|.+\|\n?)*)/g,(_,header,rows)=>{
+    const ths = header.split('|').filter(Boolean).map(h=>`<th style="padding:8px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.08)">${h.trim()}</th>`).join('');
+    const trs = rows.trim().split('\n').map(r=>{const tds=r.split('|').filter(Boolean).map(c=>`<td style="padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.05)">${c.trim()}</td>`).join('');return`<tr>${tds}</tr>`;}).join('');
+    return `<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:13px"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
+  });
+  t = t.split('\n\n').map(p=>{p=p.trim();if(!p)return'';if(p.match(/^<[hH\dpuob]/))return p;return`<p style="margin:0 0 12px">${p.replace(/\n/g,'<br>')}</p>`;}).join('');
+  return t;
+}
+
+function toEmail(text) { return toPlain(text).replace(/\n{3,}/g,'\n\n'); }
+
+function loadPreset(key) { document.getElementById('input').value = PRESETS[key]; convert(); }
+function clearInput() { document.getElementById('input').value = ''; convert(); }
+
+async function pasteClipboard() {
+  try { const t = await navigator.clipboard.readText(); document.getElementById('input').value = t; convert(); }
+  catch(e) { alert('직접 Ctrl+V로 붙여넣어 주세요.'); }
+}
+
+async function copyOutput() {
+  const text = document.getElementById('output').innerText;
+  if (!text || text.includes('왼쪽에')) return;
+  try {
+    await navigator.clipboard.writeText(text);
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '✓ 복사됨'; btn.classList.add('success');
+    setTimeout(()=>{ btn.textContent='복사'; btn.classList.remove('success'); }, 1800);
+  } catch(e) {}
+}
+
+function downloadOutput() {
+  const text = currentMode === 'html' ? document.getElementById('output').innerHTML : document.getElementById('output').innerText;
+  if (!text || text.includes('왼쪽에')) return;
+  const ext = currentMode === 'html' ? 'html' : 'txt';
+  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob([text],{type:'text/'+ext})), download: 'cleanmd.' + ext });
+  a.click();
+}
+
+document.addEventListener('keydown', e => { if ((e.ctrlKey||e.metaKey) && e.key==='Enter') copyOutput(); });
+</script>
+</body>
+</html>
